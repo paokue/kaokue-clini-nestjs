@@ -12,6 +12,7 @@ import {
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { Query } from '@nestjs/common';
 
 @Controller({ version: '1', path: 'users' })
 export class UsersController {
@@ -28,8 +29,18 @@ export class UsersController {
   }
 
   @Get()
-  findAll() {
-    return this.usersService.findAll();
+  async findAll() {
+    const { users, total } = await this.usersService.findAll();
+    return { users, total };
+  }
+
+  @Get('paginate')
+  async findAllWithPagination(@Query() query: any) {
+    const { users, count } = await this.usersService.findAllWithPagination(
+      query.page,
+      query.page_size,
+    );
+    return { users, total: count };
   }
 
   @Get(':id')

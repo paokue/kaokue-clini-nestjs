@@ -38,8 +38,29 @@ export class UsersService {
     }
   }
 
-  async findAll(): Promise<User[]> {
-    return await this.usersRepository.find({ order: { id: 'DESC' } });
+  async findAll(): Promise<{ users: User[]; total: number }> {
+    const [users, total] = await this.usersRepository.findAndCount({
+      order: { id: 'DESC' },
+    });
+    return { users, total };
+  }
+
+  async findAllWithPagination(
+    page: number,
+    page_size: number,
+  ): Promise<{ users: User[]; count: number }> {
+    if (page_size > 50) {
+      throw new HttpException(
+        'Number of data must be less then 50',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    const [users, count] = await this.usersRepository.findAndCount({
+      skip: (page - 1) * page_size,
+      take: page_size,
+      order: { id: 'DESC' },
+    });
+    return { users, count };
   }
 
   // example of using sql
